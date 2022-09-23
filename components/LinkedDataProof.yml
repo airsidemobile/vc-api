@@ -9,39 +9,49 @@ info:
   contact:
     name: GitHub Source Code
     url: https://github.com/w3c-ccg/vc-api
-paths:
+paths: {}
 components:
   schemas:
     LinkedDataProof:
       type: object
       description: A JSON-LD Linked Data proof.
+      additionalProperties: false
       properties:
         type:
           type: string
+          maxLength: 256
           description: Linked Data Signature Suite used to produce proof.
         created:
           type: string
+          maxLength: 256
           description: Date the proof was created.
         challenge:
           type: string
+          maxLength: 256
           description: A value chosen by the verifier to mitigate authentication proof replay attacks.
         domain:
           type: string
+          maxLength: 256
           description: The domain of the proof to restrict its use to a particular target.
         nonce:
           type: string
+          maxLength: 256
           description: A value chosen by the creator of a proof to randomize proof values for privacy purposes.
         verificationMethod:
           type: string
+          maxLength: 256
           description: Verification Method used to verify proof.
         proofPurpose:
           type: string
+          maxLength: 256
           description: The purpose of the proof to be used with verificationMethod.
         jws:
           type: string
+          maxLength: 4096
           description: Detached JSON Web Signature.
         proofValue:
           type: string
+          maxLength: 4096
           description: Value of the Linked Data proof.
       example:
         {
