@@ -20,6 +20,7 @@ components:
         type:
           type: string
           maxLength: 256
+          pattern: '[^\x00-\x1F\x7F]*'
           description: Linked Data Signature Suite used to produce proof.
         created:
           type: string
@@ -29,30 +30,37 @@ components:
         challenge:
           type: string
           maxLength: 256
+          pattern: '[^\x00-\x1F\x7F]*'
           description: A value chosen by the verifier to mitigate authentication proof replay attacks.
         domain:
           type: string
           maxLength: 256
+          pattern: '[^\x00-\x1F\x7F]*'
           description: The domain of the proof to restrict its use to a particular target.
         nonce:
           type: string
           maxLength: 256
+          pattern: '[^\x00-\x1F\x7F]*'
           description: A value chosen by the creator of a proof to randomize proof values for privacy purposes.
         verificationMethod:
           type: string
           maxLength: 256
+          pattern: '[^\x00-\x1F\x7F]*'
           description: Verification Method used to verify proof.
         proofPurpose:
           type: string
           maxLength: 256
+          pattern: '[^\x00-\x1F\x7F]*'
           description: The purpose of the proof to be used with verificationMethod.
         jws:
           type: string
           maxLength: 4096
+          pattern: '[^\x00-\x1F\x7F]*'
           description: Detached JSON Web Signature.
         proofValue:
           type: string
           maxLength: 4096
+          pattern: '[^\x00-\x1F\x7F]*'
           description: Value of the Linked Data proof.
       example:
         {
