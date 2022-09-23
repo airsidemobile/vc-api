@@ -23,6 +23,7 @@ components:
           description: Linked Data Signature Suite used to produce proof.
         created:
           type: string
+          format: date
           maxLength: 256
           description: Date the proof was created.
         challenge:
