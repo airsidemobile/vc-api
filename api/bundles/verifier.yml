@@ -23,6 +23,7 @@ paths:
         - oAuth2: []
         - zCap: []
       operationId: verifyCredential
+      x-expectedCaller: Verification Coordinator
       description: Verifies a verifiableCredential and returns a verificationResult in the response body.
       requestBody:
         content:
@@ -39,8 +40,6 @@ paths:
                 $ref: '#/components/schemas/VerificationResult'
         '400':
           description: invalid input!
-        '500':
-          description: error!
   /presentations/verify:
     post:
       summary: Verifies a Presentation with or without proofs attached and returns a verificationResult in the response body.
@@ -51,6 +50,7 @@ paths:
         - oAuth2: []
         - zCap: []
       operationId: verifyPresentation
+      x-expectedCaller: Verification Coordinator
       description: Verifies a verifiablePresentation and returns a verificationResult in the response body.  Given the possibility of denial of service, buffer overflow, or other style attacks, an implementation is permitted to rate limit or restrict requests against this API endpoint to those requests that contain only a single credential with a 413 or 429 error code as appropriate.
       requestBody:
         content:
@@ -66,15 +66,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VerificationResult'
+                $ref: '#/components/schemas/schemas-VerificationResult'
         '400':
           description: Invalid or malformed input
         '413':
           description: Payload too large
         '429':
           description: Request rate limit exceeded.
-        '500':
-          description: Internal Server Error
   /challenges:
     post:
       summary: Passing an empty body to this endpoint creates and returns a challenge string in the response body.
@@ -83,6 +81,7 @@ paths:
         - oAuth2: []
         - zCap: []
       operationId: challenge
+      x-expectedCaller: Verification Coordinator
       description: Creates a challenge to be used as `options.challenge` in future requests.
       responses:
         '200':
@@ -93,8 +92,6 @@ paths:
                 $ref: '#/components/schemas/CreateChallengeResult'
         '400':
           description: Invalid or malformed input
-        '500':
-          description: Internal server error
 components:
   securitySchemes:
     networkAuth:
@@ -136,7 +133,7 @@ components:
         presentation:
           $ref: '#/components/schemas/Presentation'
     VerifyPresentationResponse:
-      $ref: '#/components/schemas/VerificationResult'
+      $ref: '#/components/schemas/schemas-VerificationResult'
     CreateChallengeResponse:
       $ref: '#/components/schemas/CreateChallengeResult'
     Issuer:
@@ -292,7 +289,7 @@ components:
           description: Errors
           items:
             type: string
-        verifiedCredential:
+        credential:
           type: object
           description: The verified credential
       example:
@@ -406,9 +403,41 @@ components:
         domain:
           type: string
           description: The intended domain of validity for the proof. For example website.example
+        returnPresentation:
+          type: boolean
+          description: Should the verified presentation be returned in the response? If true, then the verified presentation should be returned in the form in which it was verified. If false or not provided, then the verified presentation should not be returned.
       example:
         domain: example.com
         challenge: d436f0c8-fbd9-4e48-bbb2-55fc5d0920a8
+        returnPresentation: true
+    schemas-VerificationResult:
+      type: object
+      additionalProperties: false
+      description: Object summarizing a verification
+      properties:
+        checks:
+          type: array
+          description: The checks performed
+          items:
+            type: string
+        warnings:
+          type: array
+          description: Warnings
+          items:
+            type: string
+        errors:
+          type: array
+          description: Errors
+          items:
+            type: string
+        presentation:
+          type: object
+          description: The verified presentation
+      example:
+        checks:
+          - proof
+        warnings: []
+        errors: []
     CreateChallengeResult:
       type: object
       additionalProperties: false

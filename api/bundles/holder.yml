@@ -22,6 +22,7 @@ paths:
         - oAuth2: []
         - zCap: []
       summary: Gets a credential or verifiable credential by ID. To get a credential that does not have credential.id set but has an associated credentialId value, pass credentialId instead.
+      x-expectedCaller: Issuer Coordinator
       operationId: getCredential
       parameters:
         - $ref: '#/components/parameters/ObjectId'
@@ -44,10 +45,6 @@ paths:
           description: Gone! There is no data here
         '418':
           description: I'm a teapot - MUST not be returned outside of pre-arranged scenarios between both parties
-        '500':
-          description: Internal Error
-        '501':
-          description: Not Implemented
     delete:
       tags:
         - Credentials
@@ -56,6 +53,7 @@ paths:
         - oAuth2: []
         - zCap: []
       summary: Deletes a credential or verifiable credential by ID. To delete a credential that does not have credential.id set but has an associated credentialId value, pass credentialId instead.
+      x-expectedCaller: Issuer Coordinator
       operationId: deleteCredential
       parameters:
         - $ref: '#/components/parameters/ObjectId'
@@ -70,10 +68,6 @@ paths:
           description: Credential not found
         '410':
           description: Gone! There is no data here
-        '500':
-          description: Internal Error
-        '501':
-          description: Not Implemented
   /credentials:
     get:
       tags:
@@ -84,6 +78,7 @@ paths:
         - zCap: []
       summary: Gets list of credentials or verifiable credentials
       operationId: getCredentials
+      x-expectedCaller: Holder Coordinator or Issuer Coordinator
       parameters:
         - in: query
           name: type
@@ -110,10 +105,6 @@ paths:
           description: Not Authorized
         '410':
           description: Gone! There is no data here
-        '500':
-          description: Internal Error
-        '501':
-          description: Not Implemented
   /credentials/derive:
     post:
       tags:
@@ -125,6 +116,7 @@ paths:
       summary: Derives a credential and returns it in the response body.
       operationId: deriveCredential
       description: Derives a credential and returns it in the response body.
+      x-expectedCaller: Holder Coordinator
       requestBody:
         content:
           application/json:
@@ -140,10 +132,6 @@ paths:
                 $ref: '#/components/schemas/VerifiableCredential'
         '400':
           description: Invalid Request
-        '500':
-          description: Internal Error
-        '501':
-          description: Not Implemented
   /presentations/{id}:
     get:
       tags:
@@ -154,6 +142,7 @@ paths:
         - oAuth2: []
         - zCap: []
       operationId: getPresentation
+      x-expectedCaller: Holder Coordinator
       parameters:
         - $ref: '#/components/parameters/ObjectId'
       responses:
@@ -173,10 +162,6 @@ paths:
           description: Presentation not found
         '410':
           description: Gone! There is no data here
-        '500':
-          description: Internal Error
-        '501':
-          description: Not Implemented
     delete:
       tags:
         - Presentations
@@ -186,6 +171,7 @@ paths:
         - oAuth2: []
         - zCap: []
       operationId: deletePresentation
+      x-expectedCaller: Holder Coordinator
       parameters:
         - $ref: '#/components/parameters/ObjectId'
       responses:
@@ -199,10 +185,6 @@ paths:
           description: Presentation not found
         '410':
           description: Gone! There is no data here
-        '500':
-          description: Internal Error
-        '501':
-          description: Not Implemented
   /presentations:
     get:
       tags:
@@ -213,6 +195,7 @@ paths:
         - oAuth2: []
         - zCap: []
       operationId: getPresentations
+      x-expectedCaller: Holder Coordinator
       parameters:
         - in: query
           name: type
@@ -239,38 +222,32 @@ paths:
           description: Not Authorized
         '410':
           description: Gone! There is no data here
-        '500':
-          description: Internal Error
-        '501':
-          description: Not Implemented
-  /presentations/prove:
     post:
-      summary: Proves a presentation and returns it in the response body.
+      summary: Creates a presentation and returns it in the response body.
       tags:
         - Presentations
       security:
         - networkAuth: []
         - oAuth2: []
         - zCap: []
-      operationId: provePresentation
-      description: Proves a presentation and returns it in the response body.
+      operationId: createPresentation
+      x-expectedCaller: Holder Coordinator
+      description: Creates a presentation and returns it in the response body.
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProvePresentationRequest'
-        description: Parameters for proving the presentation.
+              $ref: '#/components/schemas/CreatePresentationRequest'
+        description: Parameters for creating the presentation.
       responses:
         '201':
-          description: Presentation successfully proved!
+          description: Presentation successfully created!
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProvePresentationResponse'
+                $ref: '#/components/schemas/CreatePresentationResponse'
         '400':
           description: invalid input!
-        '500':
-          description: error!
   /exchanges:
     get:
       summary: Provides a discovery endpoint for the exchanges supported by this server endpoint.
@@ -354,8 +331,6 @@ paths:
                   next: '3'
         '400':
           description: invalid input
-        '500':
-          description: error
   /exchanges/{exchange-id}:
     post:
       summary: Initiates an exchange of information.
@@ -391,10 +366,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error.
-        '501':
-          description: Service not implemented.
   /exchanges/{exchange-id}/{transaction-id}:
     post:
       summary: Receives information related to an existing exchange.
@@ -433,10 +404,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: The associated exchange or transaction was not found.
-        '500':
-          description: Internal server error.
-        '501':
-          description: Service not implemented.
 components:
   securitySchemes:
     networkAuth:
@@ -465,14 +432,14 @@ components:
           $ref: '#/components/schemas/DeriveCredentialOptions'
     DeriveCredentialResponse:
       $ref: '#/components/schemas/VerifiableCredential'
-    ProvePresentationRequest:
+    CreatePresentationRequest:
       type: object
       properties:
         presentation:
           $ref: '#/components/schemas/Presentation'
         options:
           $ref: '#/components/schemas/PresentCredentialOptions'
-    ProvePresentationResponse:
+    CreatePresentationResponse:
       type: object
       properties:
         verifiablePresentation:
