@@ -133,7 +133,7 @@ components:
         id: did:key:z6MkjRagNiMu91DduvCvgEsqLZDVzrJzFrwahc4tXLt9DoHd
     UnsecuredCredential:
       type: object
-      description: A W3C Verifiable Credential without a proof.
+      description: A W3C Verifiable Credential intended for issuance.
       properties:
         '@context':
           type: array
@@ -159,6 +159,14 @@ components:
         credentialSubject:
           type: object
           description: The subject
+        proof:
+          type: object
+          description: An optional proof for credentials that are secured using proof sets or chains.
+          oneOf:
+            - type: object
+            - type: array
+              items:
+                type: object
       example:
         '@context':
           - https://www.w3.org/2018/credentials/v1

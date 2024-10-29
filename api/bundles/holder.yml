@@ -443,7 +443,11 @@ components:
       type: object
       properties:
         verifiablePresentation:
-          $ref: '#/components/schemas/VerifiablePresentation'
+          type: object
+          description: A JSON-LD Verifiable Presentation with a proof.
+          oneOf:
+            - $ref: '#/components/schemas/VerifiablePresentation'
+            - $ref: '#/components/schemas/EnvelopedVerifiablePresentation'
     NotifyPresentationAvailableRequest:
       type: object
       properties:
@@ -760,6 +764,25 @@ components:
         created: '2020-04-02T18:48:36Z'
         domain: example.com
         challenge: d436f0c8-fbd9-4e48-bbb2-55fc5d0920a8
+    EnvelopedVerifiablePresentation:
+      type: object
+      description: An object used to express an enveloped verifiable presentation.
+      properties:
+        '@context':
+          type: array
+          description: The JSON-LD context of the enveloped verifiable presentation.
+          items:
+            type: string
+        id:
+          type: string
+          description: This MUST be a "data:" scheme URL [RFC2397] that expresses a secured verifiable presentation using an enveloping security scheme.
+        type:
+          type: string
+          description: This MUST be EnvelopedVerifiablePresentation.
+      example:
+        '@context': https://www.w3.org/ns/credentials/v2
+        id: data:application/vp+jwt,eyJraWQiO...zhwGfQ
+        type: EnvelopedVerifiablePresentation
     VerifiablePresentationRequest:
       type: object
       description: A Verifiable Presentation Request.

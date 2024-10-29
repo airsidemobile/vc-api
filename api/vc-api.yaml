@@ -1448,7 +1448,11 @@ components:
       type: object
       properties:
         verifiablePresentation:
-          $ref: '#/components/schemas/VerifiablePresentation'
+          type: object
+          description: A JSON-LD Verifiable Presentation with a proof.
+          oneOf:
+            - $ref: '#/components/schemas/VerifiablePresentation'
+            - $ref: '#/components/schemas/EnvelopedVerifiablePresentation'
     NotifyPresentationAvailableRequest:
       type: object
       properties:
@@ -1559,6 +1563,27 @@ components:
         created: '2020-04-02T18:48:36Z'
         domain: example.com
         challenge: d436f0c8-fbd9-4e48-bbb2-55fc5d0920a8
+    EnvelopedVerifiablePresentation:
+      type: object
+      description: An object used to express an enveloped verifiable presentation.
+      properties:
+        '@context':
+          type: array
+          description: The JSON-LD context of the enveloped verifiable presentation.
+          items:
+            type: string
+        id:
+          type: string
+          description: >-
+            This MUST be a "data:" scheme URL [RFC2397] that expresses a secured
+            verifiable presentation using an enveloping security scheme.
+        type:
+          type: string
+          description: This MUST be EnvelopedVerifiablePresentation.
+      example:
+        '@context': https://www.w3.org/ns/credentials/v2
+        id: data:application/vp+jwt,eyJraWQiO...zhwGfQ
+        type: EnvelopedVerifiablePresentation
     IssueCredentialRequest:
       type: object
       properties:
@@ -1617,7 +1642,7 @@ components:
         id: did:key:z6MkjRagNiMu91DduvCvgEsqLZDVzrJzFrwahc4tXLt9DoHd
     UnsecuredCredential:
       type: object
-      description: A W3C Verifiable Credential without a proof.
+      description: A W3C Verifiable Credential intended for issuance.
       properties:
         '@context':
           type: array
@@ -1643,6 +1668,16 @@ components:
         credentialSubject:
           type: object
           description: The subject
+        proof:
+          type: object
+          description: >-
+            An optional proof for credentials that are secured using proof sets
+            or chains.
+          oneOf:
+            - type: object
+            - type: array
+              items:
+                type: object
       example:
         '@context':
           - https://www.w3.org/2018/credentials/v1
@@ -1756,6 +1791,14 @@ components:
       additionalProperties: false
       description: Options for specifying how a credential is verified
       properties:
+        returnResults:
+          type: boolean
+          description: >-
+            Include results for each verification steps taken in the response,
+            such as verifying individual proofs, statuses and schemas.
+        returnProblemDetails:
+          type: boolean
+          description: Include ProblemDetails errors and warnings in the response.
         returnCredential:
           type: boolean
           description: >-
@@ -1764,35 +1807,134 @@ components:
             it was verified. If false or not provided, then the verified
             credential should not be returned.
       example:
+        returnProblemDetails: true
         returnCredential: true
+        returnResults: true
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          description: URL identifying the type of problem.
+        title:
+          type: string
+          description: Short but specific human-readable string for the problem.
+        detail:
+          type: string
+          description: Longer human-readable string for the problem.
+      example:
+        type: https://www.w3.org/TR/vc-data-model#PARSING_ERROR
+        title: PARSING_ERROR
+        detail: There was an error while parsing input.
     VerificationResult:
       type: object
       additionalProperties: false
-      description: Object summarizing a verification
+      description: >-
+        Object to report the result of a verification process on a
+        VerifiableCredential.
       properties:
-        checks:
-          type: array
-          description: The checks performed
-          items:
-            type: string
-        warnings:
-          type: array
-          description: Warnings
-          items:
-            type: string
-        errors:
-          type: array
-          description: Errors
-          items:
-            type: string
+        verified:
+          type: boolean
+          description: >-
+            Overall verification assertion of the VerifiableCredential. This is
+            set to `True` if no errors were detected during the verification
+            process; otherwise, `False`. See error handling section for more
+            guidance around errors, warnings, and validation and verification
+            steps.
         credential:
           type: object
-          description: The verified credential
+          description: The VerifiableCredential used as the verification input.
+        problemDetails:
+          type: array
+          description: Array consisting of ProblemDetails objects.
+          items:
+            $ref: '#/components/schemas/ProblemDetails'
+        results:
+          type: object
+          additionalProperties: false
+          description: >-
+            Verification results to be included as a more verbose output. Keys
+            are mapped to properties from the Verifiable Credential Data Model
+            which are subject to validations.
+          properties:
+            validFrom:
+              type: object
+              description: >-
+                Results of validating the validFrom property, if present in the
+                VerifiableCredential.
+              properties:
+                valid:
+                  type: boolean
+                  description: Validation result.
+                input:
+                  type: string
+                  description: The validFrom value.
+            validUntil:
+              type: object
+              description: >-
+                Results of validating the validUntil property, if present in the
+                VerifiableCredential.
+              properties:
+                valid:
+                  type: boolean
+                  description: Validation result.
+                input:
+                  type: string
+                  description: The validUntil value.
+            credentialSchema:
+              type: array
+              description: Results from validating the credentialSchema objects if any.
+              items:
+                type: object
+                description: Results from validating a credentialSchema object.
+                properties:
+                  valid:
+                    type: boolean
+                    description: Results of validating the credentialSchema object.
+                  input:
+                    type: object
+                    description: The credentialSchema object.
+            credentialStatus:
+              type: array
+              description: Results from validating the credentialStatus objects if any.
+              items:
+                type: object
+                description: Results of validating a credentialStatus object.
+                properties:
+                  value:
+                    type: integer
+                    description: Value of the statusEntry Bit.
+                  valid:
+                    type: boolean
+                    description: Results of validating the credentialStatus object.
+                  input:
+                    type: object
+                    description: The credentialStatus object.
+            proof:
+              type: array
+              description: Results from validating the proof objects if any.
+              items:
+                type: object
+                description: Results from validating a proof object.
+                properties:
+                  valid:
+                    type: boolean
+                    description: Results of validating the proof object.
+                  input:
+                    type: object
+                    description: The proof object.
       example:
-        checks:
-          - proof
-        warnings: []
-        errors: []
+        verified: false
+        credential: {}
+        problemDetails:
+          - title: PARSING_ERROR
+            type: 'https://www.w3.org/TR/vc-data-model#PARSING_ERROR '
+        results:
+          validFrom: []
+          validUntil: []
+          credentialSchema: []
+          credentialStatus: []
+          proof: []
     VerifyPresentationOptions:
       type: object
       additionalProperties: false
