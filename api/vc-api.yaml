@@ -303,12 +303,15 @@ paths:
           content:
             application/json:
               schema:
-                type: array
+                type: object
                 description: The Credentials
-                items:
-                  anyOf:
-                    - $ref: '#/components/schemas/VerifiableCredential'
-                    - $ref: '#/components/schemas/Credential'
+                properties:
+                  results:
+                    type: array
+                    items:
+                      anyOf:
+                        - $ref: '#/components/schemas/VerifiableCredential'
+                        - $ref: '#/components/schemas/EnvelopedVerifiableCredential'
         '400':
           description: Bad Request
         '401':
@@ -1515,6 +1518,29 @@ components:
       properties:
         verifiablePresentation:
           $ref: '#/components/schemas/VerifiablePresentation'
+    EnvelopedVerifiableCredential:
+      type: object
+      description: >-
+        An object used to associate an enveloped verifiable credential with the
+        verifiableCredential property in a verifiable presentation.
+      properties:
+        '@context':
+          type: array
+          description: The JSON-LD context of the enveloped verifiable credential.
+          items:
+            type: string
+        id:
+          type: string
+          description: >-
+            This MUST be a "data:" scheme URL [RFC2397] that expresses a secured
+            verifiable credential using an enveloping security scheme.
+        type:
+          type: string
+          description: This MUST be EnvelopedVerifiableCredential.
+      example:
+        '@context': https://www.w3.org/ns/credentials/v2
+        id: data:application/vc+sd-jwt;QzVjV...RMjU
+        type: EnvelopedVerifiableCredential
     DeriveCredentialOptions:
       type: object
       additionalProperties: false
@@ -1735,29 +1761,6 @@ components:
           - /issuer
           - /validFrom
           - /validUntil
-    EnvelopedVerifiableCredential:
-      type: object
-      description: >-
-        An object used to associate an enveloped verifiable credential with the
-        verifiableCredential property in a verifiable presentation.
-      properties:
-        '@context':
-          type: array
-          description: The JSON-LD context of the enveloped verifiable credential.
-          items:
-            type: string
-        id:
-          type: string
-          description: >-
-            This MUST be a "data:" scheme URL [RFC2397] that expresses a secured
-            verifiable credential using an enveloping security scheme.
-        type:
-          type: string
-          description: This MUST be EnvelopedVerifiableCredential.
-      example:
-        '@context': https://www.w3.org/ns/credentials/v2
-        id: data:application/vc+sd-jwt;QzVjV...RMjU
-        type: EnvelopedVerifiableCredential
     IssueCredentialSuccess:
       type: object
       description: The format returned from a successful issue request.
